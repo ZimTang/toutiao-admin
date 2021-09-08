@@ -63,22 +63,20 @@
           </template>
         </el-table-column>
         <el-table-column prop="pubdate" label="发布时间" width="180"> </el-table-column>
-        <el-table-column prop="address" label="操作" width="180">
-          <template>
+        <el-table-column label="操作" width="180">
+          <template v-slot="scope">
             <el-button
               size="mini"
-              circle
-              icon="el-icon-edit"
               type="primary"
-            >
-            </el-button>
+              icon="el-icon-edit"
+              circle
+              ></el-button>
             <el-button
               size="mini"
-              circle
-              icon="el-icon-delete"
               type="danger"
-            >
-            </el-button>
+              icon="el-icon-delete"
+              circle
+              @click="handleDelete(scope.$index, scope.row)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -93,62 +91,37 @@
 
 <script>
 import { getArticles } from '@/api/article.js'
-import { reactive, ref } from 'vue'
+import { reactive, ref, toRefs } from 'vue'
 export default {
   name: 'ArticleIndex',
   setup () {
-    const form = reactive({
-      name: '',
-      region: '',
-      date1: '',
-      date2: '',
-      delivery: false,
-      type: [],
-      resource: '',
-      desc: ''
+    const data = reactive({
+      form: {
+        name: '',
+        region: '',
+        date1: '',
+        date2: '',
+        delivery: false,
+        type: [],
+        resource: '',
+        desc: ''
+      },
+      articles: []
     })
-
-    const tableData = reactive([
-      {
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      },
-      {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      },
-      {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      },
-      {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }
-    ])
-
-    let articles = reactive([])
 
     const defaultTime1 = reactive([new Date(2000, 1, 1, 12, 0, 0)])
     const value1 = ref('')
 
     // 获取文章数据
     getArticles().then(res => {
-      articles = res.data.data
-      console.log(articles.total_count)
-      console.log(res)
+      data.articles = res.data.data.results
+      console.log(data.articles.total_count)
     })
 
     return {
-      form,
       defaultTime1,
       value1,
-      tableData,
-      articles
+      ...toRefs(data)
     }
   }
 }
