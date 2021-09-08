@@ -1,5 +1,5 @@
 <template>
-  <h1>123</h1>
+  <!-- 路由出口 -->
   <router-view />
 </template>
 
