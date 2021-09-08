@@ -64,24 +64,26 @@ export default {
       channels: []
     })
 
+    const methods = reactive({
+      onPublish: () => {
+        // 找到数据接口
+        // 封装请求方法
+        // 请求提交表单
+        addArticle(data.article).then(res => {
+          console.log(res)
+        })
+        // 处理响应结果
+      }
+    })
+    // 获取文章分类
     getArticleChannels().then(res => {
       data.channels = res.data.data.channels
       console.log(data.channels)
     })
 
-    const onPublish = () => {
-      // 找到数据接口
-      // 封装请求方法
-      // 请求提交表单
-      addArticle(data.article).then(res => {
-        console.log(res)
-      })
-      // 处理响应结果
-    }
-
     return {
       ...toRefs(data),
-      onPublish
+      ...toRefs(methods)
     }
   }
 }

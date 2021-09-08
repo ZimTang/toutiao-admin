@@ -33,7 +33,7 @@
 <script>
 import { doLogin } from '@/api/user'
 import { ElMessage } from 'element-plus'
-import { reactive, ref } from 'vue'
+import { reactive, ref, toRefs } from 'vue'
 import { useRouter } from 'vue-router'
 export default {
   methods: {
@@ -41,94 +41,92 @@ export default {
   setup () {
     // 引入路由
     const router = useRouter()
-    // 用户
-    const user = reactive({
-      // 手机号
-      mobile: '',
-      // 验证码
-      code: '',
-      // 用户是否同意协议
-      agree: false
+    const data = reactive({
+      // 用户
+      user: {
+        // 手机号
+        mobile: '',
+        // 验证码
+        code: '',
+        // 用户是否同意协议
+        agree: false
+      },
+      // 登录是否在加载中
+      loginLoading: false,
+      // 表单验证规则配置
+      formRules: {
+        mobile: [
+          { required: true, message: '手机号不能为空', trigger: 'change' },
+          { pattern: /^1[3|4|5|6|7|8|9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'change' }
+        ],
+        code: [
+          { required: true, message: '验证码不能为空', trigger: 'change' },
+          { pattern: /^\d{6}$/, message: '请输入正确的验证码格式', trigger: 'change' }
+        ],
+        agree: [
+          {
+            validator: (rule, value, callback) => {
+              if (value) {
+                callback()
+              } else {
+                callback(new Error('请同意用户协议'))
+              }
+            },
+            message: '请勾选同意用户协议',
+            trigger: 'change'
+          }
+        ]
+      }
     })
-
     // 获取表单
     const form = ref(null)
 
-    // 登录是否在加载中
-    let loginLoading = ref(false)
-
-    // 表单验证规则配置
-    const formRules = reactive({
-      mobile: [
-        { required: true, message: '手机号不能为空', trigger: 'change' },
-        { pattern: /^1[3|4|5|6|7|8|9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'change' }
-      ],
-      code: [
-        { required: true, message: '验证码不能为空', trigger: 'change' },
-        { pattern: /^\d{6}$/, message: '请输入正确的验证码格式', trigger: 'change' }
-      ],
-      agree: [
-        {
-          validator: (rule, value, callback) => {
-            if (value) {
-              callback()
-            } else {
-              callback(new Error('请同意用户协议'))
-            }
-          },
-          message: '请勾选同意用户协议',
-          trigger: 'change'
-        }
-      ]
+    const methods = reactive({
+      // 发送登录请求
+      login: () => {
+        data.loginLoading = true
+        doLogin(data.user).then(res => {
+          ElMessage({
+            showClose: true,
+            message: '登录成功',
+            type: 'success'
+          })
+          data.loginLoading = false
+          localStorage.setItem('token', res.data.data.token)
+          // 跳转到首页
+          router.push({
+            name: 'home'
+          })
+          // 登录成功
+          console.log(res)
+        }).catch(err => {
+          // 登录失败
+          ElMessage({
+            showClose: true,
+            message: '用户名或验证码输入错误',
+            type: 'error'
+          })
+          data.loginLoading = false
+          console.log(err)
+        })
+      },
+      // 点击登录按钮执行事件
+      onLogin: () => {
+        form.value.validate((valid, err) => {
+          // 如果表单验证失败，停止请求提交
+          if (!valid) {
+            return
+          }
+          // 验证成功 登录
+          methods.login()
+        })
+      }
     })
 
-    const login = function () {
-      loginLoading = true
-      doLogin(user).then(res => {
-        ElMessage({
-          showClose: true,
-          message: '登录成功',
-          type: 'success'
-        })
-        loginLoading = false
-        localStorage.setItem('token', res.data.data.token)
-        // 跳转到首页
-        router.push({
-          name: 'home'
-        })
-        // 登录成功
-        console.log(res)
-      }).catch(err => {
-        // 登录失败
-        ElMessage({
-          showClose: true,
-          message: '用户名或验证码输入错误',
-          type: 'error'
-        })
-        loginLoading = false
-        console.log(err)
-      })
-    }
-
-    // 登录
-    const onLogin = function () {
-      form.value.validate((valid, err) => {
-        // 如果表单验证失败，停止请求提交
-        if (!valid) {
-          return
-        }
-        // 验证成功 登录
-        login()
-      })
-    }
-
     return {
-      user,
-      loginLoading,
-      formRules,
-      onLogin,
-      form,
-      login
+      ...toRefs(data),
+      ...toRefs(methods),
+      form
     }
   }
 }

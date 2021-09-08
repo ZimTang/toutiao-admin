@@ -41,21 +41,21 @@
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, toRefs } from 'vue'
 
 export default defineComponent({
   name: 'LayoutAside',
   setup (props) {
-    const handleOpen = (key, keyPath) => {
-      console.log(key, keyPath)
-    }
-    const handleClose = (key, keyPath) => {
-      console.log(key, keyPath)
-    }
-    console.log(props)
+    const methods = reactive({
+      handleOpen: (key, keyPath) => {
+        console.log(key, keyPath)
+      },
+      handleClose: (key, keyPath) => {
+        console.log(key, keyPath)
+      }
+    })
     return {
-      handleOpen,
-      handleClose
+      ...toRefs(methods)
     }
   }
 })

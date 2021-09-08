@@ -51,7 +51,12 @@
       </template>
         <!-- 表格 start -->
       <el-table class="search-table" :data="articles" style="width: 100%">
-        <el-table-column prop="date" label="封面" width="180"> </el-table-column>
+        <el-table-column prop="date" label="封面" width="180">
+          <template v-slot='scope'>
+            <img v-if="scope.row.cover.images[0]" class="article-cover" :src="scope.row.cover.images[0]" alt="">
+            <img v-else class="article-cover" src="./no-cover.gif" alt="">
+          </template>
+        </el-table-column>
         <el-table-column prop="title" label="标题" width="180"> </el-table-column>
         <el-table-column prop="status" label="状态" width="180">
           <!--
@@ -96,7 +101,7 @@
 
 <script>
 import { getArticles } from '@/api/article.js'
-import { reactive, ref, toRefs } from 'vue'
+import { reactive, toRefs } from 'vue'
 export default {
   name: 'ArticleIndex',
   setup () {
@@ -122,9 +127,6 @@ export default {
       ]
     })
 
-    const defaultTime1 = reactive([new Date(2000, 1, 1, 12, 0, 0)])
-    const value1 = ref('')
-
     // 获取文章数据
     getArticles().then(res => {
       data.articles = res.data.data.results
@@ -132,8 +134,6 @@ export default {
     })
 
     return {
-      defaultTime1,
-      value1,
       ...toRefs(data)
     }
   }
@@ -165,6 +165,11 @@ export default {
 
   .box1{
     margin-top: 50px;
+  }
+
+  .article-cover{
+    width: 100px;
+    background-size: cover;
   }
 
 </style>
