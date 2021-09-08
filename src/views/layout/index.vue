@@ -15,13 +15,10 @@
             <span>{{user.name}}</span>
             <i class="el-icon-arrow-down el-icon--right"></i>
           </div>
-          <!-- <span class="el-dropdown-link">
-            下拉菜单<i class="el-icon-arrow-down el-icon--right"></i>
-          </span> -->
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>设置</el-dropdown-item>
-              <el-dropdown-item>退出</el-dropdown-item>
+              <el-dropdown-item @click="onlogout">退出</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -33,7 +30,9 @@
 
 <script>
 import { getUserProfile } from '@/api/user.js'
-import { reactive, toRefs } from 'vue'
+import { reactive, toRefs, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
 import LayoutAside from './aside.vue'
 export default {
   name: 'LayoutIndex',
@@ -46,19 +45,29 @@ export default {
       // 保存用户数据
       user: {}
     })
-    const handleClick = () => {
-      console.log(1)
-    }
 
+    // dialog弹框
+    const dialogVisible = ref(false)
+
+    const router = useRouter()
     getUserProfile().then(res => {
       state.user = res.data.data
       console.log(res.data.data)
     })
-
-    console.log((state.user))
+    const onlogout = () => {
+      ElMessageBox
+        .confirm('确认关闭？')
+        .then((_) => {
+          localStorage.removeItem('token')
+          router.push('/login')
+        })
+        .catch((_) => {
+        })
+    }
     return {
-      handleClick,
-      ...toRefs(state)
+      ...toRefs(state),
+      onlogout,
+      dialogVisible
     }
   }
 }
