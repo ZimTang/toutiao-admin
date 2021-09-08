@@ -1,13 +1,17 @@
 <template>
   <el-container class="layout-container">
-    <el-aside width="200px">
-      <LayoutAside/>
+    <el-aside width="auto" >
+      <LayoutAside :collapse="isCollapse"/>
     </el-aside>
     <el-container>
       <el-header>
-        <div>
-          <i class="el-icon-s-fold"></i>
-          <span>江苏传智播客科技教育有限公司</span>
+        <div class="title">
+          <i :class="{'el-icon-s-fold': !isCollapse, 'el-icon-s-unfold': isCollapse}" @click="handleCollapse"></i>
+          <span class="company_name">江苏传智播客科技教育有限公司</span>
+          <!-- <el-radio-group v-model="isCollapse" class="hide-button">
+            <el-button :label="false" icon="el-icon-s-fold" @click="handleCollapse">
+            </el-button>
+          </el-radio-group> -->
         </div>
         <el-dropdown>
           <div class="avatar-wrap">
@@ -23,7 +27,9 @@
           </template>
         </el-dropdown>
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -33,7 +39,7 @@ import { getUserProfile } from '@/api/user.js'
 import { reactive, toRefs, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import LayoutAside from './aside.vue'
+import LayoutAside from './components/aside.vue'
 export default {
   name: 'LayoutIndex',
   components: {
@@ -45,9 +51,13 @@ export default {
       // 保存用户数据
       user: {}
     })
-
+    const isCollapse = ref(false)
     // dialog弹框
     const dialogVisible = ref(false)
+
+    const handleCollapse = function () {
+      isCollapse.value = !isCollapse.value
+    }
 
     const router = useRouter()
     getUserProfile().then(res => {
@@ -67,7 +77,9 @@ export default {
     return {
       ...toRefs(state),
       onlogout,
-      dialogVisible
+      dialogVisible,
+      isCollapse,
+      handleCollapse
     }
   }
 }
@@ -87,6 +99,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   i{
+    line-height: 60px;
     margin-right: 5px;
   }
 }
@@ -107,8 +120,7 @@ export default {
   .el-main {
     background-color: #e9eef3;
     color: var(--el-text-color-primary);
-    text-align: center;
-    line-height: 160px;
+    // text-align: center;
   }
 
   .el-container:nth-child(6) .el-aside {
@@ -131,5 +143,15 @@ export default {
       border-radius: 5%;
       margin-right: 10px;
     }
+
+  }
+
+  .title{
+    display: flex;
+  }
+
+  .hide-button{
+    line-height: 65px;
+    margin-right: 10px;
   }
 </style>
