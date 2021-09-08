@@ -50,8 +50,7 @@ export default {
       console.log(1)
     }
 
-    const token = localStorage.getItem('token')
-    getUserProfile(token).then(res => {
+    getUserProfile().then(res => {
       state.user = res.data.data
       console.log(res.data.data)
     })
