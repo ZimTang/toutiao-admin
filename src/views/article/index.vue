@@ -13,7 +13,7 @@
       <el-form ref="form" :model="form" label-width="80px" size="small">
         <el-form-item label="状态">
           <el-radio-group v-model="status">
-            <el-radio label="null">全部</el-radio>
+            <el-radio :label="null">全部</el-radio>
             <el-radio label="0">草稿</el-radio>
             <el-radio label="1">待审核</el-radio>
             <el-radio label="2">审核通过</el-radio>
@@ -48,7 +48,7 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadArticles(1)">查询</el-button>
+          <el-button type="primary" :disabled="loading" @click="loadArticles(1)">查询</el-button>
         </el-form-item>
       </el-form>
       <!-- 表单 end -->
@@ -59,7 +59,7 @@
         <div class="filter-header">根据筛选条件共查询到{{total_count ? total_count : 0}}条数据</div>
       </template>
         <!-- 表格 start -->
-      <el-table class="search-table" :data="articles" style="width: 100%">
+      <el-table class="search-table" :data="articles" style="width: 100%" v-loading="loading">
         <el-table-column prop="date" label="封面" width="180">
           <template v-slot='scope'>
             <img v-if="scope.row.cover.images[0]" class="article-cover" :src="scope.row.cover.images[0]" alt="">
@@ -95,13 +95,13 @@
               type="danger"
               icon="el-icon-delete"
               circle
-              @click="handleDelete(scope.$index, scope.row)"></el-button>
+              @click="onDeleteArticle(scope.row.id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
       <!-- 表格 end -->
       <!-- 分页 start -->
-      <el-pagination @current-change='onCurrentChange' :page-size="pageSize" :total="total_count" class="box1" layout="prev, pager, next" background> </el-pagination>
+      <el-pagination :disabled="loading" @current-change='onCurrentChange' :page-size="pageSize" :total="total_count" class="box1" layout="prev, pager, next" background :current-page="page"> </el-pagination>
       <!-- 分页 end -->
     </el-card>
 
@@ -109,7 +109,8 @@
 </template>
 
 <script>
-import { getArticles, getArticleChannels } from '@/api/article.js'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getArticles, getArticleChannels, deleteArticle } from '@/api/article.js'
 import { reactive, toRefs } from 'vue'
 export default {
   name: 'ArticleIndex',
@@ -144,12 +145,17 @@ export default {
       // 频道id
       channelId: null,
       // 时间范围
-      rangeDate: []
+      rangeDate: [],
+      // 加载中
+      loading: true,
+      // 当前页码
+      page: 1
     })
 
     const methods = reactive({
       // 加载文章数据
       loadArticles: (page = 1) => {
+        data.loading = true
         // 获取文章数据
         getArticles({
           page,
@@ -163,6 +169,7 @@ export default {
         }).then(res => {
           data.articles = res.data.data.results
           data.total_count = res.data.data.total_count
+          data.loading = false
         })
       },
       // 实现分页器跳转功能
@@ -174,7 +181,32 @@ export default {
         getArticleChannels().then(res => {
           data.channels = res.data.data.channels
         })
+      },
+      // 删除文章
+      onDeleteArticle (id) {
+        ElMessageBox.confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+          .then(() => {
+            deleteArticle(id.toString()).then(res => {
+              console.log(res)
+              methods.loadArticles(data.page)
+            })
+            ElMessage({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+          .catch(() => {
+            ElMessage({
+              type: 'info',
+              message: '已取消删除'
+            })
+          })
       }
+
     })
 
     // 初始化获取数据

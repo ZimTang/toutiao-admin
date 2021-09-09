@@ -34,3 +34,11 @@ export const addArticle = (data, draft = false) => {
     data
   })
 }
+
+// 删除文章
+export const deleteArticle = articleId => {
+  return request({
+    method: 'DELETE',
+    url: `/mp/v1_0/articles/${articleId}`
+  })
+}
