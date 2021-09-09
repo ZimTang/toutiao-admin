@@ -12,19 +12,27 @@
        <!-- 表单 start-->
       <el-form ref="form" :model="form" label-width="80px" size="small">
         <el-form-item label="状态">
-          <el-radio-group v-model="form.resource">
-            <el-radio label="全部"></el-radio>
-            <el-radio label="草稿"></el-radio>
-            <el-radio label="待审核"></el-radio>
-            <el-radio label="审核通过"></el-radio>
-            <el-radio label="审核失败"></el-radio>
-            <el-radio label="已删除"></el-radio>
+          <el-radio-group v-model="status">
+            <el-radio label="null">全部</el-radio>
+            <el-radio label="0">草稿</el-radio>
+            <el-radio label="1">待审核</el-radio>
+            <el-radio label="2">审核通过</el-radio>
+            <el-radio label="3">审核失败</el-radio>
+            <el-radio label="4">已删除</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="频道">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+          <el-select v-model="channelId" placeholder="请选择活动区域">
+            <el-option
+            label="全部"
+            :value="null"
+             ></el-option>
+            <el-option
+            :label="channel.name"
+            :value="channel.id"
+            v-for="(channel, index) in channels"
+            :key="index"
+             ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="活动时间">
@@ -38,8 +46,7 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">立即创建</el-button>
-          <el-button>取消</el-button>
+          <el-button type="primary" @click="loadArticles(1)">查询</el-button>
         </el-form-item>
       </el-form>
       <!-- 表单 end -->
@@ -92,7 +99,7 @@
       </el-table>
       <!-- 表格 end -->
       <!-- 分页 start -->
-      <el-pagination class="box1" layout="prev, pager, next" :total="1000" background> </el-pagination>
+      <el-pagination @current-change='onCurrentChange' :page-size="pageSize" :total="total_count" class="box1" layout="prev, pager, next" background> </el-pagination>
       <!-- 分页 end -->
     </el-card>
 
@@ -100,7 +107,7 @@
 </template>
 
 <script>
-import { getArticles } from '@/api/article.js'
+import { getArticles, getArticleChannels } from '@/api/article.js'
 import { reactive, toRefs } from 'vue'
 export default {
   name: 'ArticleIndex',
@@ -117,24 +124,58 @@ export default {
         desc: ''
       },
       articles: [],
+      // 总数据条数
       total_count: '',
+      // 每页大小
+      pageSize: 10,
+      // 查询文章状态
+      status: null,
       articleStatus: [
         { text: '草稿', status: 0, type: 'warning' },
         { text: '待审核', status: 1, type: 'warning' },
         { text: '审核通过', status: 2, type: 'success' },
         { text: '审核失败', status: 3, type: 'danger' },
         { text: '已删除', status: 4, type: 'info' }
-      ]
+      ],
+      // 频道列表
+      channels: [],
+      // 频道id
+      channelId: null
     })
 
-    // 获取文章数据
-    getArticles().then(res => {
-      data.articles = res.data.data.results
-      data.total_count = res.data.data.total_count
+    const methods = reactive({
+      // 加载文章数据
+      loadArticles: (page = 1) => {
+        // 获取文章数据
+        getArticles({
+          page,
+          per_page: data.pageSize,
+          status: data.status,
+          channel_id: data.channelId
+        }).then(res => {
+          data.articles = res.data.data.results
+          data.total_count = res.data.data.total_count
+        })
+      },
+      // 实现分页器跳转功能
+      onCurrentChange: (page) => {
+        methods.loadArticles(page)
+      },
+      // 获取频道列表
+      loadChannels () {
+        getArticleChannels().then(res => {
+          data.channels = res.data.data.channels
+        })
+      }
     })
+
+    // 初始化获取数据
+    methods.loadArticles()
+    methods.loadChannels()
 
     return {
-      ...toRefs(data)
+      ...toRefs(data),
+      ...toRefs(methods)
     }
   }
 }
