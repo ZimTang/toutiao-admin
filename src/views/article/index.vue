@@ -37,11 +37,13 @@
         </el-form-item>
         <el-form-item label="活动时间">
           <el-date-picker
-            v-model="value1"
-            type="datetimerange"
+            v-model="rangeDate"
+            type="daterange"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            :default-time="defaultTime1"
+            :default-time="new Date()"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
           >
           </el-date-picker>
         </el-form-item>
@@ -140,7 +142,9 @@ export default {
       // 频道列表
       channels: [],
       // 频道id
-      channelId: null
+      channelId: null,
+      // 时间范围
+      rangeDate: []
     })
 
     const methods = reactive({
@@ -151,7 +155,11 @@ export default {
           page,
           per_page: data.pageSize,
           status: data.status,
-          channel_id: data.channelId
+          channel_id: data.channelId,
+          // 开始日期
+          begin_pubdate: data.rangeDate ? data.rangeDate[0] : null,
+          // 结束日期
+          end_pubdate: data.rangeDate ? data.rangeDate[1] : null
         }).then(res => {
           data.articles = res.data.data.results
           data.total_count = res.data.data.total_count
