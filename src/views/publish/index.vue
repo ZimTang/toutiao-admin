@@ -11,7 +11,7 @@
         </template>
         <el-form ref="form" :model="article" label-width="80px">
           <el-form-item label="标题">
-            <el-input v-model="article.name"></el-input>
+            <el-input v-model="article.title"></el-input>
           </el-form-item>
           <el-form-item label="内容">
             <el-input type="textarea" v-model="article.content"></el-input>
@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus'
 import { getArticleChannels, addArticle } from '@/api/article'
 import { reactive, toRefs } from 'vue'
 export default {
@@ -71,6 +72,11 @@ export default {
         // 请求提交表单
         addArticle(data.article).then(res => {
           console.log(res)
+          ElMessage({
+            showClose: true,
+            message: '删除成功',
+            type: 'success'
+          })
         })
         // 处理响应结果
       }
