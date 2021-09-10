@@ -9,13 +9,13 @@
           </el-breadcrumb>
         <!-- 面包屑导航 end-->
         </template>
-        <el-form ref="form" :model="article" label-width="80px">
-          <el-form-item label="标题">
+        <el-form ref="form" :model="article" label-width="80px" :rules="formRules">
+          <el-form-item label="标题" prop="title">
             <el-input v-model="article.title"></el-input>
           </el-form-item>
-          <el-form-item label="内容" style="margin-bottom: 100px;">
-            <!-- <el-input type="textarea" v-model="article.content"></el-input> -->
-            <QuillEditor theme="snow" />
+          <el-form-item label="内容" prop="content">
+            <el-input type="textarea" v-model="article.content"></el-input>
+            <!-- <QuillEditor theme="snow" v-model="article.content"/> -->
           </el-form-item>
           <el-form-item label="封面">
             <el-radio-group v-model="article.cover.type">
@@ -25,7 +25,7 @@
               <el-radio :label="-1">自动</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="频道">
+          <el-form-item label="频道" prop="channel_id">
             <el-select v-model="article.channel_id" placeholder="请选择频道">
               <el-option
               :label="channel.name"
@@ -47,18 +47,20 @@
 <script>
 import { ElMessage } from 'element-plus'
 import { getArticleChannels, addArticle, getArticle, updateArticle } from '@/api/article'
-import { reactive, toRefs } from 'vue'
+import { reactive, toRefs, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { QuillEditor } from '@vueup/vue-quill'
+// 引入富文本编辑器
+// import { QuillEdito  r } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 export default {
   name: 'PublishIndex',
-  components: {
-    QuillEditor
-  },
+  // components: {
+  //   QuillEditor
+  // },
   setup () {
     const route = useRoute()
     const router = useRouter()
+    const form = ref(null)
     const data = reactive({
       article: {
         title: '', // 文章标题
@@ -71,7 +73,30 @@ export default {
         channel_id: null
       },
       // 文章频道列表
-      channels: []
+      channels: [],
+      // 表单验证规则
+      formRules: {
+        title: [
+          {
+            required: true, message: '请输入标题内容', trigger: 'blur'
+          }
+        ],
+        content: [
+          {
+            required: true, message: '请输入标题内容', trigger: 'blur'
+          },
+          {
+            min: 5,
+            message: '长度至少5个字符',
+            trigger: 'blur'
+          }
+        ],
+        channel_id: [
+          {
+            required: true, message: '请选择频道', trigger: 'change'
+          }
+        ]
+      }
     })
 
     const methods = reactive({
@@ -83,29 +108,35 @@ export default {
       },
       onPublish: ($event, draft = false) => {
         const articleId = route.query.id
-        // 如果是修改文章 则执行修改操作
-        if (articleId) {
-          updateArticle(articleId, data.article, draft).then(res => {
-            ElMessage({
-              showClose: true,
-              message: draft ? '存入草稿成功' : '修改文章成功',
-              type: 'success'
-            })
-            console.log(res)
-            router.push('/article')
-          })
-        } else {
-          // 如果是新建文章，则执行新建操作
-          addArticle(data.article, draft).then(res => {
-            console.log(res)
-            ElMessage({
-              showClose: true,
-              message: '添加文章成功',
-              type: 'success'
-            })
-            router.push('/article')
-          })
-        }
+        form.value.validate(valide => {
+          if (!valide) {
+            return null
+          } else {
+            // 如果是修改文章 则执行修改操作
+            if (articleId) {
+              updateArticle(articleId, data.article, draft).then(res => {
+                ElMessage({
+                  showClose: true,
+                  message: draft ? '存入草稿成功' : '修改文章成功',
+                  type: 'success'
+                })
+                console.log(res)
+                router.push('/article')
+              })
+            } else {
+              // 如果是新建文章，则执行新建操作
+              addArticle(data.article, draft).then(res => {
+                console.log(res)
+                ElMessage({
+                  showClose: true,
+                  message: '添加文章成功',
+                  type: 'success'
+                })
+                router.push('/article')
+              })
+            }
+          }
+        })
       }
     })
     // 获取文章分类
@@ -120,7 +151,8 @@ export default {
 
     return {
       ...toRefs(data),
-      ...toRefs(methods)
+      ...toRefs(methods),
+      form
     }
   }
 }
