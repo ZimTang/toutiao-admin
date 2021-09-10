@@ -88,6 +88,7 @@
               size="mini"
               type="primary"
               icon="el-icon-edit"
+              @click="editArticle(scope.row.id)"
               circle
               ></el-button>
             <el-button
@@ -112,9 +113,11 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getArticles, getArticleChannels, deleteArticle } from '@/api/article.js'
 import { reactive, toRefs } from 'vue'
+import { useRouter } from 'vue-router'
 export default {
   name: 'ArticleIndex',
   setup () {
+    const router = useRouter()
     const data = reactive({
       form: {
         name: '',
@@ -205,8 +208,11 @@ export default {
               message: '已取消删除'
             })
           })
+      },
+      // 编辑文章
+      editArticle (id) {
+        router.push(`/publish/?id=${id}`)
       }
-
     })
 
     // 初始化获取数据

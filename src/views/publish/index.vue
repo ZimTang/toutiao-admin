@@ -5,7 +5,7 @@
         <!-- 面包屑导航 start-->
           <el-breadcrumb separator-class="el-icon-arrow-right">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>发布文章</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ $route.query.id ? '修改文章': '发布文章' }}</el-breadcrumb-item>
           </el-breadcrumb>
         <!-- 面包屑导航 end-->
         </template>
@@ -36,7 +36,7 @@
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="onPublish">发表</el-button>
-            <el-button>存入草稿</el-button>
+            <el-button @click="onPublish($event,false)">存入草稿</el-button>
           </el-form-item>
         </el-form>
     </el-card>
@@ -45,11 +45,14 @@
 
 <script>
 import { ElMessage } from 'element-plus'
-import { getArticleChannels, addArticle } from '@/api/article'
+import { getArticleChannels, addArticle, getArticle, updateArticle } from '@/api/article'
 import { reactive, toRefs } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 export default {
   name: 'PublishIndex',
   setup () {
+    const route = useRoute()
+    const router = useRouter()
     const data = reactive({
       article: {
         title: '', // 文章标题
@@ -66,26 +69,48 @@ export default {
     })
 
     const methods = reactive({
-      onPublish: () => {
-        // 找到数据接口
-        // 封装请求方法
-        // 请求提交表单
-        addArticle(data.article).then(res => {
-          console.log(res)
-          ElMessage({
-            showClose: true,
-            message: '删除成功',
-            type: 'success'
-          })
+      // 修改文章：加载原文章的内容
+      loadPublish: () => {
+        getArticle(route.query.id).then(res => {
+          data.article = res.data.data
         })
-        // 处理响应结果
+      },
+      onPublish: ($event, draft = false) => {
+        const articleId = route.query.id
+        // 如果是修改文章 则执行修改操作
+        if (articleId) {
+          updateArticle(articleId, data.article, draft).then(res => {
+            ElMessage({
+              showClose: true,
+              message: draft ? '存入草稿成功' : '修改文章成功',
+              type: 'success'
+            })
+            console.log(res)
+            router.push('/article')
+          })
+        } else {
+          // 如果是新建文章，则执行新建操作
+          addArticle(data.article, draft).then(res => {
+            console.log(res)
+            ElMessage({
+              showClose: true,
+              message: '添加文章成功',
+              type: 'success'
+            })
+            router.push('/article')
+          })
+        }
       }
     })
     // 获取文章分类
     getArticleChannels().then(res => {
       data.channels = res.data.data.channels
-      console.log(data.channels)
     })
+
+    // 判断是新建文章还是编辑文章
+    if (route.query.id) {
+      methods.loadPublish()
+    }
 
     return {
       ...toRefs(data),

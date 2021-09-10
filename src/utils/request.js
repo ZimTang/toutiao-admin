@@ -16,7 +16,7 @@ const request = axios.create({
   }]
 })
 
-// Add a request interceptor
+// 请求拦截器
 request.interceptors.request.use(function (config) {
   const token = localStorage.getItem('token')
   // 统一设置token
