@@ -13,8 +13,9 @@
           <el-form-item label="标题">
             <el-input v-model="article.title"></el-input>
           </el-form-item>
-          <el-form-item label="内容">
-            <el-input type="textarea" v-model="article.content"></el-input>
+          <el-form-item label="内容" style="margin-bottom: 100px;">
+            <!-- <el-input type="textarea" v-model="article.content"></el-input> -->
+            <QuillEditor theme="snow" />
           </el-form-item>
           <el-form-item label="封面">
             <el-radio-group v-model="article.cover.type">
@@ -48,8 +49,13 @@ import { ElMessage } from 'element-plus'
 import { getArticleChannels, addArticle, getArticle, updateArticle } from '@/api/article'
 import { reactive, toRefs } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
 export default {
   name: 'PublishIndex',
+  components: {
+    QuillEditor
+  },
   setup () {
     const route = useRoute()
     const router = useRouter()
