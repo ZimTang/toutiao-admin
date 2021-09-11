@@ -15,56 +15,11 @@
       </el-radio-group>
       <div style="margin-top:20px">
          <el-row :gutter="10">
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
+          <el-col :xs="12" :sm="6" :md="6" :lg="4" v-for="(image,index) in images" :key="index"
             ><div class="grid-content bg-purple">
               <el-image
                 style="width: 100px; height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="cover"
-              ></el-image>
-            </div
-          ></el-col>
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
-            ><div class="grid-content bg-purple">
-              <el-image
-                style="width: 100px; height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="cover"
-              ></el-image>
-            </div
-          ></el-col>
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
-            ><div class="grid-content bg-purple">
-              <el-image
-                style="width: 100px; height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="cover"
-              ></el-image>
-            </div
-          ></el-col>
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
-            ><div class="grid-content bg-purple">
-              <el-image
-                style="width: 100px; height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="cover"
-              ></el-image>
-            </div
-          ></el-col>
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
-            ><div class="grid-content bg-purple">
-              <el-image
-                style="width: 100px; height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
-                fit="cover"
-              ></el-image>
-            </div
-          ></el-col>
-          <el-col :xs="12" :sm="6" :md="6" :lg="4"
-            ><div class="grid-content bg-purple">
-              <el-image
-                style="height: 100px"
-                src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
+                :src="image.url"
                 fit="cover"
               ></el-image>
             </div
@@ -76,12 +31,20 @@
 </template>
 
 <script>
+import { getImages } from '@/api/image'
 import { reactive, toRefs } from 'vue'
 export default {
   name: 'ImageIndex',
   setup () {
     const data = reactive({
+      // 存放所有图片
+      images: [],
       radio1: '全部'
+    })
+    // 请求图片素材
+    getImages().then(res => {
+      data.images = res.data.data.results
+      console.log(res)
     })
     return {
       ...toRefs(data)
