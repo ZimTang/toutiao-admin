@@ -25,17 +25,23 @@
                 :src="image.url"
                 fit="cover"
               ></el-image>
-              <div class="shade_box">
-                <el-icon class="el-icon-star-on" style="color:white" @click="onStarImage(image)" v-if="image.is_collected"></el-icon>
-                <el-icon class="el-icon-star-off" style="color:white" @click="onStarImage(image)" v-else></el-icon>
-                <el-icon class="el-icon-delete-solid" style="color:red" @click="onDeleteImage(image.id)"></el-icon>
+              <div class="shade_box" >
+                <el-button
+                 v-loading="image.loading"
+                 type="warning"
+                 :icon="!image.is_collected ? 'el-icon-star-off': 'el-icon-star-on'"
+                 circle
+                 size="mini"
+                 @click="onStarImage(image)"
+                 ></el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini" circle @click="onDeleteImage(image)"></el-button>
               </div>
             </div
           ></el-col>
         </el-row>
       </div>
 
-    <el-pagination background :page-size="20" layout="prev, pager, next" :total="total_count" class="box1" @current-change="onCurrentPage" :current-change="page"></el-pagination>
+    <el-pagination background :page-size="pageSize" layout="prev, pager, next" :total="total_count" class="box1" @current-change="onCurrentPage" :current-change="page"></el-pagination>
     </el-card>
     <el-dialog
       title="提示"
@@ -80,7 +86,9 @@ export default {
       // 总图片数量
       total_count: '',
       // 当前页数
-      page: 1
+      page: 1,
+      // 控制每页的图片数量
+      pageSize: 10
     })
     console.log(data.uploadHeaders)
     const methods = reactive({
@@ -88,10 +96,14 @@ export default {
       loadImages (page, collect = false) {
         getImages({
           collect,
-          page
+          page,
+          per_page: data.pageSize
         }).then(res => {
           data.images = res.data.data.results
           data.total_count = res.data.data.total_count
+          data.images.forEach(item => {
+            item.loading = false
+          })
           console.log(res.data.data)
         })
       },
@@ -114,17 +126,21 @@ export default {
       },
       // 收藏图片
       onStarImage (img) {
+        img.loading = true
+        img.is_collected = !img.is_collected
         starImage({
-          collect: !img.is_collected
+          collect: img.is_collected
         }, img.id).then(res => {
-          location.reload()
           console.log(res)
+          img.loading = false
         })
       },
       // 删除图片
-      onDeleteImage (id) {
-        deleteImage(id).then(res => {
-          location.reload()
+      onDeleteImage (img) {
+        img.loading = true
+        deleteImage(img.id).then(res => {
+          img.loading = false
+          methods.loadImages()
           console.log(res)
         })
       }
@@ -155,9 +171,9 @@ export default {
 
 .shade_box{
   width: 100px;
-  height: 20px;
+  height: 30px;
   background-color: gray;
-  opacity: 50%;
+  opacity: 80%;
   position: absolute;
   z-index: 999;
   bottom: 4px;
