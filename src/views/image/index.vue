@@ -9,9 +9,9 @@
         </el-breadcrumb>
       <!-- 面包屑导航 end-->
       </template>
-      <el-radio-group v-model="radio1">
-        <el-radio-button label="全部"></el-radio-button>
-        <el-radio-button label="收藏"></el-radio-button>
+      <el-radio-group v-model="collect" @change="onCollectChange">
+        <el-radio-button :label="false">全部</el-radio-button>
+        <el-radio-button :label="true">收藏</el-radio-button>
       </el-radio-group>
       <div style="margin-top:20px">
          <el-row :gutter="10">
@@ -39,15 +39,29 @@ export default {
     const data = reactive({
       // 存放所有图片
       images: [],
-      radio1: '全部'
+      // 是否展示收藏的图片
+      collect: false
     })
-    // 请求图片素材
-    getImages().then(res => {
-      data.images = res.data.data.results
-      console.log(res)
+    const methods = reactive({
+      // 请求图片素材
+      loadImages (collect = false) {
+        getImages({
+          collect
+        }).then(res => {
+          data.images = res.data.data.results
+          console.log(res)
+        })
+      },
+      onCollectChange () {
+        methods.loadImages(data.collect)
+      }
     })
+
+    // 初始化图片素材
+    methods.loadImages()
     return {
-      ...toRefs(data)
+      ...toRefs(data),
+      ...toRefs(methods)
     }
   }
 }
