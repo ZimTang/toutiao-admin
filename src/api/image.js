@@ -11,3 +11,20 @@ export const getImages = (params) => {
     params
   })
 }
+
+// 收藏文章
+export const starImage = (data, imageId) => {
+  return request({
+    method: 'PUT',
+    url: '/mp/v1_0/user/images/' + imageId,
+    data
+  })
+}
+
+// 收藏文章
+export const deleteImage = (imageId) => {
+  return request({
+    method: 'DELETE',
+    url: '/mp/v1_0/user/images/' + imageId
+  })
+}
