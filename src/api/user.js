@@ -20,4 +20,21 @@ export const getUserProfile = () => {
   })
 }
 
-// 修改用户信息
+// 修改用户头像
+// 必须是formdata格式的数据
+export const updateUserAvatar = (data) => {
+  return request({
+    method: 'PATCH',
+    url: '/mp/v1_0/user/photo',
+    data
+  })
+}
+
+// 修改用户资料
+export const updateUser = (data) => {
+  return request({
+    method: 'PATCH',
+    url: '/mp/v1_0/user/profile',
+    data
+  })
+}

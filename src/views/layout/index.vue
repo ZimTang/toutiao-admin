@@ -40,6 +40,7 @@ import { reactive, toRefs, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import LayoutAside from './components/aside.vue'
+import eventBus from '@/utils/eventBus.js'
 export default {
   name: 'LayoutIndex',
   components: {
@@ -47,7 +48,7 @@ export default {
   },
   setup () {
     // 数据
-    const state = reactive({
+    const data = reactive({
       // 保存用户数据
       user: {}
     })
@@ -61,7 +62,17 @@ export default {
 
     const router = useRouter()
     getUserProfile().then(res => {
-      state.user = res.data.data
+      data.user = res.data.data
+      // 更新顶部用户信息
+      eventBus.$on('update-user', (user, photo) => {
+        data.user = user
+        data.user.photo = photo
+      })
+      // 更新顶部用户头像
+      eventBus.$on('update-user-avatar', (photo) => {
+        data.user.photo = photo
+        console.log(photo)
+      })
       console.log(res.data.data)
     })
     const onlogout = () => {
@@ -75,7 +86,7 @@ export default {
         })
     }
     return {
-      ...toRefs(state),
+      ...toRefs(data),
       onlogout,
       dialogVisible,
       isCollapse,
