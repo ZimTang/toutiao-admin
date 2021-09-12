@@ -10,6 +10,7 @@ const Publish = () => import('@/views/publish/index.vue')
 const Image = () => import('@/views/image/index.vue')
 const Comment = () => import('@/views/comment/index.vue')
 const Settings = () => import('@/views/settings/index.vue')
+const Fans = () => import('@/views/fans/index.vue')
 
 const routes = [
   {
@@ -51,6 +52,11 @@ const routes = [
         path: '/settings',
         name: 'settings',
         component: Settings
+      },
+      {
+        path: '/fans',
+        name: 'fans',
+        component: Fans
       }
     ]
   }
