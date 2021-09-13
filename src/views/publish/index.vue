@@ -24,6 +24,12 @@
               <el-radio :label="0">无图</el-radio>
               <el-radio :label="-1">自动</el-radio>
             </el-radio-group>
+            <template v-if="article.cover.type > 0">
+              <upload-cover
+                :key="cover"
+                v-for="cover in article.cover.type"
+              />
+            </template>
           </el-form-item>
           <el-form-item label="频道" prop="channel_id">
             <el-select v-model="article.channel_id" placeholder="请选择频道">
@@ -49,6 +55,7 @@ import { ElMessage } from 'element-plus'
 import { getArticleChannels, addArticle, getArticle, updateArticle } from '@/api/article'
 import { reactive, toRefs, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import UploadCover from './components/upload-cover.vue'
 // 引入富文本编辑器
 // import { QuillEdito  r } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
@@ -57,6 +64,9 @@ export default {
   // components: {
   //   QuillEditor
   // },
+  components: {
+    UploadCover
+  },
   setup () {
     const route = useRoute()
     const router = useRouter()
