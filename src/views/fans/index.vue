@@ -1,15 +1,24 @@
 <template>
   <!-- 准备容器 -->
   <div ref="myRef" style="width:600px;height:400px;"></div>
+  <h2>百度地图示例1</h2>
+  <MapDemo/>
+  <h2>百度地图示例2</h2>
+  <BMapDemo/>
 </template>
 
 <script>
 // 引入echarts
 import * as echarts from 'echarts'
 import { ref, onMounted } from 'vue'
-
+import MapDemo from './components/map-demo.vue'
+import BMapDemo from './components/Bmap-demo.vue'
 export default {
   name: 'FansIndex',
+  components: {
+    MapDemo,
+    BMapDemo
+  },
   setup () {
     const myRef = ref(null)
 
