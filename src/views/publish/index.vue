@@ -27,7 +27,9 @@
             <template v-if="article.cover.type > 0">
               <upload-cover
                 :key="cover"
-                v-for="cover in article.cover.type"
+                v-for="(cover, index) in article.cover.type"
+                @updateCover="onUpdateCover(index, $event)"
+                :coverImg="article.cover.images[index]"
               />
             </template>
           </el-form-item>
@@ -147,6 +149,11 @@ export default {
             }
           }
         })
+      },
+      // 自定义事件
+      onUpdateCover (index, url) {
+        // 将子组件的封面图的url传给父组件
+        data.article.cover.images[index] = url
       }
     })
     // 获取文章分类
